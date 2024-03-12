@@ -43,7 +43,7 @@ public class ftpserver extends Thread {
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
             fromClient = inFromClient.readLine();
 
-            //System.out.println("Read line: " + fromClient);
+            System.out.println("Read line: " + fromClient);
             StringTokenizer tokens = new StringTokenizer(fromClient);
 
             frstln = tokens.nextToken();
@@ -53,7 +53,7 @@ public class ftpserver extends Thread {
 
             if (clientCommand.equals("list:")) {
                 String curDir = System.getProperty("user.dir");
-                System.out.println("Working Directory: " + curDir);
+                //System.out.println("Working Directory: " + curDir);
 
                 Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
                 DataOutputStream dataOutToClient = new DataOutputStream(dataSocket.getOutputStream());
@@ -76,17 +76,40 @@ public class ftpserver extends Thread {
                             // System.out.println("eof");
                         } // if(i-1)
 
-                    } // for
-
+                    }
                     dataSocket.close();
                     // System.out.println("Data Socket closed");
-                } // else
-
-            } // if list:
+                }
+            }
 
             if (clientCommand.equals("get:")) {
-                //TODO
-            } // main
+                String fileName = tokens.nextToken();
+                System.out.println("DEBUG: Client requested: " + fileName);
+                String curDir = System.getProperty("user.dir");
+
+                Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
+                DataOutputStream dataOut = new DataOutputStream(dataSocket.getOutputStream());
+
+                if (new File(curDir, fileName).exists()) { //Check if file exists in server's dir
+                    System.out.println("DEBUG: FILE EXISTS");
+                    dataOut.writeUTF("200 OK ");
+
+                    BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
+
+                    String fileLine = fileReader.readLine();
+                    while (fileLine != null) { //Read lines until eof
+                        dataOut.writeUTF(fileLine + "\n"); //readLine() ignores newlines so we have to add them back
+                        fileLine = fileReader.readLine();
+                    }
+                    dataOut.writeUTF("eof");
+                    System.out.println("DEBUG: FILE SENT");
+                    fileReader.close();
+                }else{
+                    System.out.println("DEBUG: FILE DOESNT EXIST");
+                    dataOut.writeUTF("550 FILE NOT FOUND ");
+                }
+                dataSocket.close();
+            }
         }
     }
 }
