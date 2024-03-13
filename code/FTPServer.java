@@ -116,6 +116,47 @@ public class FTPServer extends Thread {
 
         dataSocket.close();
       }
+
+
+
+
+      if (clientCommand.equals("stor:")) {
+        String fileName = tokens.nextToken();
+        System.out.println("DEBUG: Client requested to store: " + fileName);
+        String curDir = System.getProperty("user.dir");
+
+        Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
+        DataOutputStream dataOutToClient = new DataOutputStream(dataSocket.getOutputStream());
+
+        // Send confirmation to client
+        dataOutToClient.writeUTF("200 OK ");
+
+        // Create a BufferedReader to read file data line by line from the client
+        BufferedReader dataInFromClient = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
+
+        // Create the file on the server
+        File fileToReceive = new File(curDir, fileName);
+        FileWriter fileWriter = new FileWriter(fileToReceive);
+
+        String line;
+        while ((line = dataInFromClient.readLine()) != null) {
+          if (line.equals("eof")) { // Check for end of file marker
+            break;
+          }
+
+          fileWriter.write(line + "\n"); // Write each line to the file
+        }
+
+        fileWriter.close();
+        dataInFromClient.close(); // Close the input stream as well
+        dataSocket.close();
+
+        System.out.println("DEBUG: File received successfully");
+      }
+
+
+
+
     }
   }
 }

@@ -109,27 +109,29 @@ class FTPClient {
 					port += 2;
 					ServerSocket welcomeData = new ServerSocket(port);
 
-          String fileName = inputTokens.nextToken().substring(5);
+					String fileName = inputTokens.nextToken();
+					fileName = inputTokens.nextToken();
           File fileToSend = new File(fileName);
           if (!fileToSend.exists()) {
-              System.out.println("File '" + fileName + "' does not exist in the client directory.");
-              continue; 
+            System.out.println("File '" + fileName + "' does not exist in the client directory.");
+            continue; 
           }
           
           outToServer.writeBytes(port + " " + userInput + "\n");
           Socket dataSocket = welcomeData.accept();
           DataOutputStream outData = new DataOutputStream(new BufferedOutputStream(dataSocket.getOutputStream()));
           
-          FileInputStream fileInputStream = new FileInputStream(fileToSend);
-          byte[] buffer = new byte[4096];
-          int bytesRead;
+          BufferedReader fileReader = new BufferedReader(new FileReader(fileToSend));
+          String line;
 
-          while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-            outData.write(buffer, 0, bytesRead);
+          while ((line = fileReader.readLine()) != null) {
+            outData.writeUTF(line); // Write each line to the output stream
+            outData.writeUTF("\n"); // Write newline character
           }
-          fileInputStream.close();
+          fileReader.close();
 
           outData.writeUTF("eof");
+          outData.flush(); // Flush the stream to ensure all data is sent
           dataSocket.close();
           welcomeData.close();
           System.out.println("File '" + fileName + "' uploaded successfully.");
