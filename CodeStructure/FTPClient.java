@@ -92,17 +92,18 @@ class FTPClient {
 						fileWriter.close();
 						welcomeData.close();
 
-					}else if(status.equals("550 FILE NOT FOUND ")){
+					} else if(status.equals("550 FILE NOT FOUND ")){
 						System.out.println("\nThat file does not exist on the server.\nUse the list command to see available files.\n");
-					}else{
+					} else{
 						System.out.println("An unknown error has occured.\nPlease try again.");
 					}
-				}else if(userInput.equals("close")){
+				} else if(userInput.equals("close")){
 					clientgo = false;
 				}
 
 			}
-			System.out.print("No server exists with that name, or server not listening on that port try agian");
+
+			//System.out.print("No server exists with that name, or server not listening on that port try agian");
 		} else {
 			System.out.println("Error: Please use the connect <servername> <port> command");
 		}
