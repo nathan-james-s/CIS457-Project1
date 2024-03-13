@@ -5,12 +5,12 @@ import java.text.*;
 import java.lang.*;
 import javax.swing.*;
 
-public class ftpserver extends Thread {
+public class FTPServer extends Thread {
     private Socket connectionSocket;
     int port;
     int count = 1;
 
-    public ftpserver(Socket connectionSocket) {
+    public FTPServer(Socket connectionSocket) {
         this.connectionSocket = connectionSocket;
     }
 
@@ -114,12 +114,6 @@ public class ftpserver extends Thread {
                     dataOut.writeUTF("550 FILE NOT FOUND ");
                 }
                 dataSocket.close();
-            }
-
-            if (clientCommand.equals("close")) {
-                System.out.println("CLOSING CONNECTION...");
-                connectionSocket.close();
-                break;
             }
 
         }
