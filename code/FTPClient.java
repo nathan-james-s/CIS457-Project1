@@ -36,8 +36,8 @@ class FTPClient {
 			port1 = Integer.parseInt(connectionTokens.nextToken());
 			System.out.println("You are connected to " + serverName);
 			Socket ControlSocket = new Socket(serverName, port1);
-			while (isOpen && clientgo) {
 
+			while (isOpen && clientgo) {
 				DataOutputStream outToServer = new DataOutputStream(ControlSocket.getOutputStream());
 				DataInputStream inFromServer = new DataInputStream(new BufferedInputStream(ControlSocket.getInputStream()));
 				String userInput = inFromUser.readLine(); // Added this as a variable separate from sentence variable, which is now used for connection only
@@ -45,7 +45,6 @@ class FTPClient {
 
 				if (userInput.equals("list:")) {
 					port += 2;
-					//System.out.println("PORT: " + port);
 					ServerSocket welcomeData = new ServerSocket(port);
 
 					System.out.println("\n \n \nThe files on this server are:");
@@ -64,9 +63,10 @@ class FTPClient {
 					dataSocket.close();
 					System.out.println("\nWhat would you like to do next: \nget: file.txt ||  stor: file.txt  || close");
 
-				} else if (userInput.startsWith("get: ") || userInput.startsWith("retr: ")) {
+				}
+
+        if (userInput.startsWith("get: ") || userInput.startsWith("retr: ")) {
 					port += 2;
-					//System.out.println("PORT: " + port);
 
 					String fileName = inputTokens.nextToken();
 					fileName = inputTokens.nextToken();
@@ -103,13 +103,43 @@ class FTPClient {
 					} else{
 						System.out.println("An unknown error has occured.\nPlease try again.");
 					}
-				} else if(userInput.equals("close")){
-					clientgo = false;
 				}
 
-			}
+        if (userInput.startsWith("stor: ")) {
+					port += 2;
+					ServerSocket welcomeData = new ServerSocket(port);
 
-			//System.out.print("No server exists with that name, or server not listening on that port try agian");
+          String fileName = inputTokens.nextToken().substring(5);
+          File fileToSend = new File(fileName);
+          if (!fileToSend.exists()) {
+              System.out.println("File '" + fileName + "' does not exist in the client directory.");
+              continue; 
+          }
+          
+          outToServer.writeBytes(port + " " + userInput + "\n");
+          Socket dataSocket = welcomeData.accept();
+          DataOutputStream outData = new DataOutputStream(new BufferedOutputStream(dataSocket.getOutputStream()));
+          
+          FileInputStream fileInputStream = new FileInputStream(fileToSend);
+          byte[] buffer = new byte[4096];
+          int bytesRead;
+
+          while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+            outData.write(buffer, 0, bytesRead);
+          }
+          fileInputStream.close();
+
+          outData.writeUTF("eof");
+          dataSocket.close();
+          welcomeData.close();
+          System.out.println("File '" + fileName + "' uploaded successfully.");
+        }
+
+        if(userInput.equals("close")){
+          // TODO add actual end communication message to server 
+					clientgo = false;
+				}
+			}
 		} else {
 			System.out.println("Error: Please use the connect <servername> <port> command");
 		}
