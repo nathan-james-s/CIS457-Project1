@@ -44,7 +44,12 @@ public class ftpserver extends Thread {
             fromClient = inFromClient.readLine();
 
             System.out.println("Read line: " + fromClient);
-            StringTokenizer tokens = new StringTokenizer(fromClient);
+            StringTokenizer tokens;
+            try {
+              tokens = new StringTokenizer(fromClient);
+            } catch(Exception e) {
+              break;
+            }
 
             frstln = tokens.nextToken();
             port = Integer.parseInt(frstln);
@@ -104,12 +109,19 @@ public class ftpserver extends Thread {
                     dataOut.writeUTF("eof");
                     System.out.println("DEBUG: FILE SENT");
                     fileReader.close();
-                }else{
+                } else{
                     System.out.println("DEBUG: FILE DOESNT EXIST");
                     dataOut.writeUTF("550 FILE NOT FOUND ");
                 }
                 dataSocket.close();
             }
+
+            if (clientCommand.equals("close")) {
+                System.out.println("CLOSING CONNECTION...");
+                connectionSocket.close();
+                break;
+            }
+
         }
     }
 }
