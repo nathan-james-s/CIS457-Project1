@@ -7,19 +7,25 @@ import javax.swing.*;
 
 class FTPClient {
 
-	public static void main(String argv[]) throws Exception {
+  public static void main(String argv[]) throws Exception {
 		String sentence;
 		String modifiedSentence;
 		boolean isOpen = true;
 		int number = 1;
-		// oolean notEnd = true; //useless
 		int port1 = 1221;
 		int port = 1200;
 		String statusCode;
 		boolean clientgo = true;
 
-		System.out.println(
-				"Welcome to the simple FTP App   \n     Commands  \nconnect servername port# connects to a specified server \nlist: lists files on server \nget: fileName.txt downloads that text file to your current directory \nstor: fileName.txt Stores the file on the server \nclose terminates the connection to the server \nretr: downloads specified file from server");
+    String welcome_str = "Welcome to the simple FTP App\n" +
+      "Commands  \n" + 
+      "connect servername port# connects to a specified server \n" + 
+      "list: lists files on server \n" + 
+      "get: fileName.txt downloads that text file to your current directory \n" + 
+      "stor: fileName.txt Stores the file on the server \n" + 
+      "close terminates the connection to the server \n" + 
+      "retr: downloads specified file from server";
+		System.out.println(welcome_str);
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		sentence = inFromUser.readLine();
 		StringTokenizer connectionTokens = new StringTokenizer(sentence);
