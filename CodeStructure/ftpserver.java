@@ -82,7 +82,7 @@ public class ftpserver extends Thread {
                 }
             }
 
-            if (clientCommand.equals("get:")) {
+            if (clientCommand.equals("get:") || clientCommand.equals("retr:")) {
                 String fileName = tokens.nextToken();
                 System.out.println("DEBUG: Client requested: " + fileName);
                 String curDir = System.getProperty("user.dir");

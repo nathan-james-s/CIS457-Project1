@@ -56,10 +56,9 @@ class FTPClient {
 
 					welcomeData.close();
 					dataSocket.close();
-					System.out
-							.println("\nWhat would you like to do next: \nget: file.txt ||  stor: file.txt  || close");
+					System.out.println("\nWhat would you like to do next: \nget: file.txt ||  stor: file.txt  || close");
 
-				} else if (userInput.startsWith("get: ")) {
+				} else if (userInput.startsWith("get: ") || userInput.startsWith("retr: ")) {
 					port += 2;
 					//System.out.println("PORT: " + port);
 
@@ -98,50 +97,7 @@ class FTPClient {
 					}else{
 						System.out.println("An unknown error has occured.\nPlease try again.");
 					}
-				}
-
-				else if (userInput.startsWith("retr: ")) {
-					port += 2;
-					//System.out.println("PORT: " + port);
-
-					String fileName = inputTokens.nextToken(); // pass the retr command
-					fileName = inputTokens.nextToken();
-
-					ServerSocket welcomeData = new ServerSocket(port);
-
-					outToServer.writeBytes(port + " " + "get: " + fileName + " " + '\n'); // send get: command to server
-
-					Socket dataSocket = welcomeData.accept();
-					DataInputStream inData = new DataInputStream(new BufferedInputStream(dataSocket.getInputStream()));
-
-					String status = inData.readUTF();
-					if (status.equals("200 OK ")) {
-							System.out.println("\nDownloading file...");
-
-							File file = new File("client" + fileName); // appending client to filename to keep track since client and server run out of the same folder for now
-							FileWriter fileWriter = new FileWriter(file);
-
-							while (true) {
-									String fileData = inData.readUTF();
-									if (fileData.equals("eof")) { // if EOF stop reading
-											break;
-									} else { // else write to file
-											fileWriter.write(fileData);
-									}
-							}
-
-							System.out.println("Successfully downloaded " + fileName + "\n");
-							fileWriter.close();
-							welcomeData.close();
-
-					}else if(status.equals("550 FILE NOT FOUND ")){
-							System.out.println("\nThat file does not exist on the server.\nUse the list command to see available files.\n");
-					}else{
-							System.out.println("An unknown error has occured.\nPlease try again.");
-					}
-				}
-
-				else if (userInput.equals("close")) {
+				}else if(userInput.equals("close")){
 					clientgo = false;
 				}
 
