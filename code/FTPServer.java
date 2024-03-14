@@ -47,6 +47,7 @@ public class FTPServer extends Thread {
       try {
         tokens = new StringTokenizer(fromClient);
       } catch(Exception e) {
+        System.out.println("User disconnected" + connectionSocket.getInetAddress());
         break;
       }
 
