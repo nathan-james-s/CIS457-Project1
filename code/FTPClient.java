@@ -47,7 +47,7 @@ class FTPClient {
 					port += 2;
 					ServerSocket welcomeData = new ServerSocket(port);
 
-					System.out.println("\n \n \nThe files on this server are:");
+					System.out.println("\n files on this server are:");
 					outToServer.writeBytes(port + " " + userInput + " " + '\n');
 
 					Socket dataSocket = welcomeData.accept();
@@ -107,7 +107,6 @@ class FTPClient {
 
         if (userInput.startsWith("stor: ")) {
 					port += 2;
-					ServerSocket welcomeData = new ServerSocket(port);
 
 					String fileName = inputTokens.nextToken();
 					fileName = inputTokens.nextToken();
@@ -116,26 +115,38 @@ class FTPClient {
             System.out.println("File '" + fileName + "' does not exist in the client directory.");
             continue; 
           }
-          
-          outToServer.writeBytes(port + " " + userInput + "\n");
-          Socket dataSocket = welcomeData.accept();
-          DataOutputStream outData = new DataOutputStream(new BufferedOutputStream(dataSocket.getOutputStream()));
-          
-          BufferedReader fileReader = new BufferedReader(new FileReader(fileToSend));
-          String line;
 
-          while ((line = fileReader.readLine()) != null) {
-            outData.writeUTF(line); // Write each line to the output stream
-            outData.writeUTF("\n"); // Write newline character
-          }
-          fileReader.close();
+					ServerSocket welcomeData = new ServerSocket(port);
 
-          outData.writeUTF("eof");
-          outData.flush(); // Flush the stream to ensure all data is sent
-          dataSocket.close();
-          welcomeData.close();
-          System.out.println("File '" + fileName + "' uploaded successfully.");
-        }
+					outToServer.writeBytes(port + " " + userInput + " " + '\n');
+
+					Socket dataSocket = welcomeData.accept();
+					DataInputStream inData = new DataInputStream(new BufferedInputStream(dataSocket.getInputStream()));
+					DataOutputStream outData = new DataOutputStream(new BufferedOutputStream(dataSocket.getOutputStream()));
+
+					String status = inData.readUTF();
+					if (status.equals("200 OK ")) {
+						System.out.println("\nUploading file...");
+
+            BufferedReader fileReader = new BufferedReader(new FileReader(fileToSend));
+            BufferedWriter dataToServer = new BufferedWriter(new OutputStreamWriter(outData));
+
+            String line;
+            while ((line = fileReader.readLine()) != null) {
+              dataToServer.write(line + "\n"); // Write each line to the server
+            }
+            dataToServer.write("eof\n"); // Send end of file marker
+
+            fileReader.close();
+            dataToServer.close(); // Close the writer
+						welcomeData.close();
+						System.out.println("Successfully uploaded " + fileName + "\n");
+					} else if(status.equals("550 FILE NOT FOUND ")){
+						System.out.println("\nThat file does not exist on the server.\nUse the list command to see available files.\n");
+					} else{
+						System.out.println("An unknown error has occured.\nPlease try again.");
+					}
+				}
 
         if(userInput.equals("close")){
           // TODO add actual end communication message to server 

@@ -148,6 +148,9 @@ public class FTPServer extends Thread {
         }
 
         fileWriter.close();
+        dataInFromClient.close(); // Close the reader
+
+        fileWriter.close();
         dataInFromClient.close(); // Close the input stream as well
         dataSocket.close();
 
