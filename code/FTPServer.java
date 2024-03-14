@@ -43,22 +43,20 @@ public class FTPServer extends Thread {
       BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
       fromClient = inFromClient.readLine();
 
-      System.out.println("Read line: " + fromClient);
       StringTokenizer tokens;
       try {
         tokens = new StringTokenizer(fromClient);
       } catch(Exception e) {
+        System.out.println("User disconnected" + connectionSocket.getInetAddress());
         break;
       }
 
       frstln = tokens.nextToken();
       port = Integer.parseInt(frstln);
       clientCommand = tokens.nextToken();
-      System.out.println("GOT COMMAND: " + clientCommand);
 
       if (clientCommand.equals("list:")) {
         String curDir = System.getProperty("user.dir");
-        //System.out.println("Working Directory: " + curDir);
 
         Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
         DataOutputStream dataOutToClient = new DataOutputStream(dataSocket.getOutputStream());
@@ -88,14 +86,12 @@ public class FTPServer extends Thread {
 
       if (clientCommand.equals("get:") || clientCommand.equals("retr:")) {
         String fileName = tokens.nextToken();
-        System.out.println("DEBUG: Client requested: " + fileName);
         String curDir = System.getProperty("user.dir");
 
         Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
         DataOutputStream dataOut = new DataOutputStream(dataSocket.getOutputStream());
 
         if (new File(curDir, fileName).exists()) { //Check if file exists in server's dir
-          System.out.println("DEBUG: FILE EXISTS");
           dataOut.writeUTF("200 OK ");
 
           BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
@@ -107,10 +103,8 @@ public class FTPServer extends Thread {
           }
 
           dataOut.writeUTF("eof");
-          System.out.println("DEBUG: FILE SENT");
           fileReader.close();
         } else {
-          System.out.println("DEBUG: FILE DOESNT EXIST");
           dataOut.writeUTF("550 FILE NOT FOUND ");
         }
 
@@ -122,7 +116,6 @@ public class FTPServer extends Thread {
 
       if (clientCommand.equals("stor:")) {
         String fileName = tokens.nextToken();
-        System.out.println("DEBUG: Client requested to store: " + fileName);
         String curDir = System.getProperty("user.dir");
 
         Socket dataSocket = new Socket(connectionSocket.getInetAddress(), port);
@@ -154,12 +147,7 @@ public class FTPServer extends Thread {
         dataInFromClient.close(); // Close the input stream as well
         dataSocket.close();
 
-        System.out.println("DEBUG: File received successfully");
       }
-
-
-
-
     }
   }
 }
